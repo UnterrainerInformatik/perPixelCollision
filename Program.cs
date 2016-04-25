@@ -37,20 +37,30 @@ namespace Test
         {
             Texture2D a = Content.Load<Texture2D>("first_texture");
             Color[] aData = GetData(a);
-            Matrix aTransform = GetTransformationMatrix(origin: new Vector2(10, 10), scale: new Vector2(1, 1),
-                rotation: 0,
-                position: new Vector2(100, 100));
+            Matrix aTransform = GetTransformationMatrix(position: new Vector2(100, 100), origin: new Vector2(10, 10),
+                scale: new Vector2(1, 1),
+                rotation: 0);
 
             Texture2D b = Content.Load<Texture2D>("second_texture");
             Color[] bData = GetData(b);
-            Matrix bTransform = GetTransformationMatrix(origin: new Vector2(10, 10), scale: new Vector2(1, 1),
-                rotation: 0,
-                position: new Vector2(150, 150));
+            Matrix bTransform = GetTransformationMatrix(position: new Vector2(150, 150), origin: new Vector2(10, 10),
+                scale: new Vector2(1, 1),
+                rotation: 0);
 
             bool result = IntersectPixels(aTransform, a.Width, a.Height, aData, bTransform, b.Width, b.Height, bData);
         }
 
-        public Matrix GetTransformationMatrix(Vector2 origin, Vector2 scale, float rotation, Vector2 position)
+        /// <summary>
+        ///     Gets the transformation matrix for a sprite with a position (top left corner of the texture... down and right is +)
+        ///     that is rotated around an origin (that is subtracted from the position) and scaled by a value on the X-axis and
+        ///     another value on the Y-axis (given by a Vector2).
+        /// </summary>
+        /// <param name="origin">The origin.</param>
+        /// <param name="scale">The scale.</param>
+        /// <param name="rotation">The rotation.</param>
+        /// <param name="position">The position.</param>
+        /// <returns></returns>
+        public Matrix GetTransformationMatrix(Vector2 position, Vector2 origin, Vector2 scale, float rotation)
         {
             Matrix result = Matrix.Identity;
             result *= Matrix.CreateTranslation(-origin.X, -origin.Y, 0f);
