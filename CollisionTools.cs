@@ -34,6 +34,14 @@ namespace Demo.PerPixelCollision
 {
     public class CollisionTools
     {
+        /// <summary>
+        ///     Gets the transformation matrix from a sprite with a position (top left corner of the texture... down and right is
+        ///     +)
+        ///     that is rotated around an origin (that is subtracted from the position) and scaled by a value on the X-axis and
+        ///     another value on the Y-axis (given by a Vector2).
+        /// </summary>
+        /// <param name="sprite">The sprite to get the transformation matrix from.</param>
+        /// <returns></returns>
         public static Matrix GetTransformationMatrix(Sprite sprite)
         {
             return GetTransformationMatrix(sprite.Position, sprite.Origin, sprite.Scale, sprite.Rotation);
@@ -59,19 +67,34 @@ namespace Demo.PerPixelCollision
             return result;
         }
 
+        /// <summary>
+        ///     Gets the collision-data from a given and already loaded Texture2D.
+        ///     BEWARE! This operation is very expensive since it calls Texture2D.GetData().
+        ///     So be sure to call this only once per texture and at the beginning of your game.
+        ///     Save the result.
+        /// </summary>
+        /// <param name="tex">The texture to get the collision-data from.</param>
+        /// <returns></returns>
         public static bool[] GetCollisionData(Texture2D tex)
         {
             return GetCollisionData(GetData(tex), tex.Width, tex.Height);
         }
 
+        /// <summary>
+        ///     Gets the collision-data from a color-array of a given and already loaded Texture2D.
+        /// </summary>
+        /// <param name="data">The data in the form of a color-array.</param>
+        /// <param name="width">The width of the texture.</param>
+        /// <param name="height">The height or the texture.</param>
+        /// <returns></returns>
         public static bool[] GetCollisionData(Color[] data, int width, int height)
         {
-            bool[] result = new bool[width * height];
+            bool[] result = new bool[width*height];
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    result[x + y * width] = data[x + y * width].A != 0;
+                    result[x + y*width] = data[x + y*width].A != 0;
                 }
             }
             return result;
@@ -129,15 +152,13 @@ namespace Demo.PerPixelCollision
             {
                 return false;
             }
-            // Calculate a matrix which transforms from A's local space into
-            // world space and then into B's local space.
+            // Calculate a matrix which transforms from A's local space into world space and then into B's local space.
             Matrix bInverted = Matrix.Invert(transformB);
             Matrix transformAtoB = transformA*bInverted;
 
-            // When a point moves in A's local space, it moves in B's local space with a
-            // fixed direction and distance proportional to the movement in A.
-            // This algorithm steps through A one pixel at a time along A's X and Y axes
-            // Calculate the analogous steps in B:
+            // When a point moves in A's local space, it moves in B's local space with a fixed direction and distance
+            // proportional to the movement in A. This algorithm steps through A one pixel at a time along A's X and
+            // Y axes Calculate the analogous steps in B:
             Vector2 stepX = Vector2.TransformNormal(Vector2.UnitX, transformAtoB);
             Vector2 stepY = Vector2.TransformNormal(Vector2.UnitY, transformAtoB);
 
@@ -145,13 +166,9 @@ namespace Demo.PerPixelCollision
             // This variable will be reused to keep track of the start of each row.
             Vector2 yPosInB = Vector2.Transform(Vector2.Zero, transformAtoB);
 
-            // For each row of pixels in A.
             for (int yA = 0; yA < heightA; yA++)
             {
-                // Start at the beginning of the row.
                 Vector2 posInB = yPosInB;
-
-                // For each pixel in this row.
                 for (int xA = 0; xA < widthA; xA++)
                 {
                     // Round to the nearest pixel.
@@ -165,23 +182,16 @@ namespace Demo.PerPixelCollision
                         bool colorA = dataA[xA + yA*widthA];
                         bool colorB = dataB[xB + yB*widthB];
 
-                        // If both pixels are not completely transparent,
+                        // If both pixels are not completely transparent, then an intersection has been found.
                         if (colorA && colorB)
                         {
-                            // then an intersection has been found.
                             return true;
                         }
                     }
-
-                    // Move to the next pixel in the row.
                     posInB += stepX;
                 }
-
-                // Move to the next row.
                 yPosInB += stepY;
             }
-
-            // No intersection found.
             return false;
         }
     }
