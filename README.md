@@ -4,6 +4,15 @@ This is a repo to coordinatinate our efforts to build a small example of part of
 
 Used the MonoGame.Extended demo project for illustration.
 
+# WARNING
+Per pixel collision testing is very expensive since it, in the worst case, compares all points of the smaller texture to the corresponding points in the second one.
+
+So it's an extremely bad choice when you:
+- are doing many tests
+- have big textures
+- have textures with large amounts of transparent pixels
+- want your program to run on any machine other than your desktop (portability, especialy to mobiles)
+
 # Setup
 Since this is a MonoGame.Extended demo project it needs MG.Extended obviously.
 Open the solution file in VS 2015.
