@@ -42,9 +42,11 @@ namespace Demo.PerPixelCollision
 
         private Sprite axeSprite;
         private bool[] axeCollisionData;
+        private Matrix axeTransform;
+        
         private Sprite spikeyBallSprite;
         private bool[] spikeyBallCollisionData;
-        
+        private Matrix spikeyBallTransform;
 
         public Game1()
         {
@@ -100,11 +102,11 @@ namespace Demo.PerPixelCollision
             spikeyBallSprite.Rotation -= deltaTime*2.5f;
             spikeyBallSprite.Position = new Vector2(mouseState.X, mouseState.Y);
 
-            Matrix axeTransform = CollisionTools.GetTransformationMatrix(axeSprite);
-            Matrix spikeyBallTransform = CollisionTools.GetTransformationMatrix(spikeyBallSprite);
+            CollisionTools.GetTransformationMatrix(axeSprite, out axeTransform);
+            CollisionTools.GetTransformationMatrix(spikeyBallSprite, out spikeyBallTransform);
 
-            bool collision = CollisionTools.IntersectPixels(axeTransform, axeSprite.TextureRegion.Texture.Width,
-                axeSprite.TextureRegion.Texture.Height, axeCollisionData, spikeyBallTransform,
+            bool collision = CollisionTools.IntersectPixels(ref axeTransform, axeSprite.TextureRegion.Texture.Width,
+                axeSprite.TextureRegion.Texture.Height, axeCollisionData, ref spikeyBallTransform,
                 spikeyBallSprite.TextureRegion.Texture.Width, spikeyBallSprite.TextureRegion.Texture.Height,
                 spikeyBallCollisionData);
 

@@ -38,37 +38,40 @@ namespace Demo.PerPixelCollision
         ///     Gets the transformation matrix from a sprite with a position (top left corner of the texture... down and right is
         ///     +)
         ///     that is rotated around an origin (that is subtracted from the position) and scaled by a value on the X-axis and
-        ///     another value on the Y-axis (given by a Vector2).
+        ///     another value on the Y-axis (given by a Vector2).<br />
+        ///     BEWARE! Only call this method if any of the input-parameters have changed.
         /// </summary>
         /// <param name="sprite">The sprite to get the transformation matrix from.</param>
-        /// <returns></returns>
-        public static Matrix GetTransformationMatrix(Sprite sprite)
+        /// <param name="matrix">A reference to the matrix that will act as the result.</param>
+        public static void GetTransformationMatrix(Sprite sprite, out Matrix matrix)
         {
-            return GetTransformationMatrix(sprite.Position, sprite.Origin, sprite.Scale, sprite.Rotation);
+            GetTransformationMatrix(sprite.Position, sprite.Origin, sprite.Scale, sprite.Rotation, out matrix);
         }
 
         /// <summary>
         ///     Gets the transformation matrix for a sprite with a position (top left corner of the texture... down and right is +)
         ///     that is rotated around an origin (that is subtracted from the position) and scaled by a value on the X-axis and
-        ///     another value on the Y-axis (given by a Vector2).
+        ///     another value on the Y-axis (given by a Vector2).<br />
+        ///     BEWARE! Only call this method if any of the input-parameters have changed.
         /// </summary>
         /// <param name="origin">The origin.</param>
         /// <param name="scale">The scale.</param>
         /// <param name="rotation">The rotation.</param>
         /// <param name="position">The position.</param>
+        /// <param name="matrix">A reference to the matrix that will act as the result.</param>
         /// <returns></returns>
-        public static Matrix GetTransformationMatrix(Vector2 position, Vector2 origin, Vector2 scale, float rotation)
+        public static void GetTransformationMatrix(Vector2 position, Vector2 origin, Vector2 scale, float rotation,
+            out Matrix matrix)
         {
-            Matrix result = Matrix.Identity;
-            result *= Matrix.CreateTranslation(-origin.X, -origin.Y, 0f);
-            result *= Matrix.CreateScale(new Vector3(scale.X, scale.Y, 1f));
-            result *= Matrix.CreateRotationZ(rotation);
-            result *= Matrix.CreateTranslation(position.X, position.Y, 0);
-            return result;
+            matrix = Matrix.Identity;
+            matrix *= Matrix.CreateTranslation(-origin.X, -origin.Y, 0f);
+            matrix *= Matrix.CreateScale(new Vector3(scale.X, scale.Y, 1f));
+            matrix *= Matrix.CreateRotationZ(rotation);
+            matrix *= Matrix.CreateTranslation(position.X, position.Y, 0);
         }
 
         /// <summary>
-        ///     Gets the collision-data from a given and already loaded Texture2D.
+        ///     Gets the collision-data from a given and already loaded Texture2D.<br />
         ///     BEWARE! This operation is very expensive since it calls Texture2D.GetData().
         ///     So be sure to call this only once per texture and at the beginning of your game.
         ///     Save the result.
@@ -101,7 +104,7 @@ namespace Demo.PerPixelCollision
         }
 
         /// <summary>
-        ///     Gets the data from a given and already loaded Texture2D.
+        ///     Gets the data from a given and already loaded Texture2D.<br />
         ///     BEWARE! This operation is very expensive since it calls Texture2D.GetData().
         ///     So be sure to call this only once per texture and at the beginning of your game.
         ///     Save the result.
@@ -145,16 +148,38 @@ namespace Demo.PerPixelCollision
         /// <returns>
         ///     True if non-transparent pixels overlap; <c>false</c> otherwise
         /// </returns>
-        public static bool IntersectPixels(Matrix transformA, int widthA, int heightA, bool[] dataA, Matrix transformB,
+        public static bool IntersectPixels(ref Matrix transformA, int widthA, int heightA, bool[] dataA, ref Matrix transformB,
             int widthB, int heightB, bool[] dataB)
         {
-            if (dataB == null)
+            if (dataA == null || dataB == null)
             {
                 return false;
             }
+
+            // Switch if A has more pixels than B.
+            Matrix transA = transformA;
+            Matrix transB = transformB;
+            int wA = widthA;
+            int wB = widthB;
+            int hA = heightA;
+            int hB = heightB;
+            bool[] dA = dataA;
+            bool[] dB = dataB;
+            if (widthA*heightA > widthB*heightB)
+            {
+                transA = transformB;
+                transB = transformA;
+                wA = widthB;
+                wB = widthA;
+                hA = heightB;
+                hB = heightA;
+                dA = dataB;
+                dB = dataA;
+            }
+            
             // Calculate a matrix which transforms from A's local space into world space and then into B's local space.
-            Matrix bInverted = Matrix.Invert(transformB);
-            Matrix transformAtoB = transformA*bInverted;
+            Matrix bInverted = Matrix.Invert(transB);
+            Matrix transformAtoB = transA*bInverted;
 
             // When a point moves in A's local space, it moves in B's local space with a fixed direction and distance
             // proportional to the movement in A. This algorithm steps through A one pixel at a time along A's X and
@@ -166,21 +191,21 @@ namespace Demo.PerPixelCollision
             // This variable will be reused to keep track of the start of each row.
             Vector2 yPosInB = Vector2.Transform(Vector2.Zero, transformAtoB);
 
-            for (int yA = 0; yA < heightA; yA++)
+            for (int yA = 0; yA < hA; yA++)
             {
                 Vector2 posInB = yPosInB;
-                for (int xA = 0; xA < widthA; xA++)
+                for (int xA = 0; xA < wA; xA++)
                 {
                     // Round to the nearest pixel.
                     int xB = (int) Math.Round(posInB.X);
                     int yB = (int) Math.Round(posInB.Y);
 
                     // If the pixel lies within the bounds of B.
-                    if (0 <= xB && xB < widthB && 0 <= yB && yB < heightB)
+                    if (0 <= xB && xB < wB && 0 <= yB && yB < hB)
                     {
                         // Get the colors of the overlapping pixels.
-                        bool colorA = dataA[xA + yA*widthA];
-                        bool colorB = dataB[xB + yB*widthB];
+                        bool colorA = dA[xA + yA*wA];
+                        bool colorB = dB[xB + yB*wB];
 
                         // If both pixels are not completely transparent, then an intersection has been found.
                         if (colorA && colorB)
