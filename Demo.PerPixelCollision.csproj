@@ -90,9 +90,11 @@
     <None Include="Content\logo-square-128.png" />
     <None Include="Content\particle.png" />
     <None Include="Content\spike_ball.png" />
+    <None Include="LICENSE" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.mgcb" />
