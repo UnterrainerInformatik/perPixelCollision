@@ -64,9 +64,13 @@ namespace Demo.PerPixelCollision
             out Matrix matrix)
         {
             matrix = Matrix.Identity;
+            // First we translate the texture to the zero-point of our coordinate system, so that we may...
             matrix *= Matrix.CreateTranslation(-origin.X, -origin.Y, 0f);
+            // scale it from there and most importantly...
             matrix *= Matrix.CreateScale(new Vector3(scale.X, scale.Y, 1f));
+            // rotate it around that origin-point instead of the top left corner (that would usually be the origin)...
             matrix *= Matrix.CreateRotationZ(rotation);
+            // Then we translate it back, so that it behaves like a normal texture again.
             matrix *= Matrix.CreateTranslation(position.X, position.Y, 0);
         }
 
@@ -157,6 +161,9 @@ namespace Demo.PerPixelCollision
             }
 
             // Switch if A has more pixels than B.
+            // This spares us many calculation steps since, in the worst case, we don't have a collision.
+            // Then all of the points have to be checked and it's less time consuming to check all points
+            // of the smaller texture against the corresponding ones in the bigger one than vice versa.
             Matrix transA = transformA;
             Matrix transB = transformB;
             int wA = widthA;
