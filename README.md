@@ -62,7 +62,8 @@ The nice thing is: No matter how many translations you add, it doesn't impair th
 Per pixel collision testing is very expensive since it, in the worst case, compares all points of the first texture to the corresponding points in the second one.
 
 So it's an extremely bad choice when you:
-* are doing many tests
+* are doing many tests  
+You can get somewhat around this by implementing a broad-phase collision detection algorithm like a [CollisionGrid](https://github.com/UnterrainerInformatik/collisiongrid) for example.
 * have big textures
 * have textures with large amounts of transparent pixels
 * want your program to run on any machine other than your desktop (portability, especialy to mobiles)
@@ -70,6 +71,11 @@ So it's an extremely bad choice when you:
 There are already a few tweaks in the code, like switching the two textures so you only have to iterate over the full set of pixels of the smaller texture, for example.
 This spares us many calculation steps since, in the worst case, we don't have a collision.
 Then all of the points have to be checked and it's less time consuming to check all points of the smaller texture against the corresponding ones in the bigger one than vice versa.
+
+# Alternative approaches
+One would be to use primitive collision-objects as axis-aligned bounding boxes (AABB) or circles enclosing your textures. That would add to your work since you'd have to find such primitives and align them to closely match the circumfences of your textures, but it would have a huge performance impact (a good one) since a collision test for such a primitive shape is pretty fast and you wouldn't have to memorize all the boolean values for every single point in the first place.  
+
+Another approach would be to use convex polygons (or use non-convex ones and split them automatically into convex ones) and use the separating axis theorem (SAT) of which I found a very good explanation [here](http://www.dyn4j.org/2010/01/sat/).  
 
 # Setup
 Since this is a MonoGame.Extended demo project it needs MG.Extended obviously.
