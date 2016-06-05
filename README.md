@@ -63,10 +63,15 @@ Per pixel collision testing is very expensive since it, in the worst case, compa
 
 So it's an extremely bad choice when you:
 * are doing many tests  
-You can get somewhat around this by implementing a broad-phase collision detection algorithm like a [CollisionGrid](https://github.com/UnterrainerInformatik/collisiongrid) for example.
-* have big textures
-* have textures with large amounts of transparent pixels
-* want your program to run on any machine other than your desktop (portability, especialy to mobiles)
+(You can get somewhat around this by implementing a broad-phase collision detection algorithm like a [CollisionGrid](https://github.com/UnterrainerInformatik/collisiongrid) for example.)
+* have big textures  
+(There's no way around that except to be careful that one of the tested textures always is very small.)
+* have textures with large amounts of transparent pixels  
+(Same as the point before.)
+* have large amounts of textures to test
+(Because you'd have to memorize the alpha-map for every single one of those which has an impact on your RAM usage.)
+* want your program to run on any machine other than your desktop (portability, especialy to mobiles)  
+(Because of the performance-impact and limitations on RAM. That's devastating on such devices where you don't have much power to begin with.)
 
 There are already a few tweaks in the code, like switching the two textures so you only have to iterate over the full set of pixels of the smaller texture, for example.
 This spares us many calculation steps since, in the worst case, we don't have a collision.
