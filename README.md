@@ -80,7 +80,7 @@ Then all of the points have to be checked and it's less time consuming to check 
 # Alternative approaches
 One would be to use primitive collision-objects as axis-aligned bounding boxes (AABB) or circles enclosing your textures. That would add to your work since you'd have to find such primitives and align them to closely match the circumfences of your textures, but it would have a huge performance impact (a good one) since a collision test for such a primitive shape is pretty fast and you wouldn't have to memorize all the boolean values for every single point in the first place.  
 
-Another approach would be to use convex polygons (or use non-convex ones and split them automatically into convex ones) and use the separating axis theorem (SAT) of which I found a very good explanation [here](http://www.dyn4j.org/2010/01/sat/).  
+Another approach would be to use convex polygons (or use non-convex ones and split them automatically into convex ones) and use the separating axis theorem (SAT) for which I found a very good explanation [here](http://www.dyn4j.org/2010/01/sat/).  
 
 # Setup
 Since this is a MonoGame.Extended demo project it needs MG.Extended obviously.
