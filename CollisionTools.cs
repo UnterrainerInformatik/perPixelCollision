@@ -84,7 +84,7 @@ namespace Demo.PerPixelCollision
         /// <returns></returns>
         public static bool[] GetCollisionData(Texture2D tex)
         {
-            return GetCollisionData(GetData(tex), tex.Width, tex.Height);
+            return GetCollisionData(GetColorData(tex), tex.Width, tex.Height);
         }
 
         /// <summary>
@@ -114,26 +114,23 @@ namespace Demo.PerPixelCollision
         ///     Save the result.
         /// </summary>
         /// <param name="tex">The texture to get the data from.</param>
-        /// <returns></returns>
-        /// <exception cref="NotSupportedException">The surface-format you want to load is not supported.</exception>
-        public static Color[] GetData(Texture2D tex)
+        /// <returns>A color array</returns>
+        public static Color[] GetColorData(Texture2D tex)
         {
-            Color[] result = new Color[tex.Width*tex.Height];
-            try
-            {
-                switch (tex.Format)
-                {
-                    case SurfaceFormat.Color:
-                        tex.GetData(0, new Rectangle(0, 0, tex.Width, tex.Height), result, 0, result.Length);
-                        break;
-                    default:
-                        throw new NotSupportedException("The surface-format you want to load is not supported.");
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                return null;
-            }
+            var target = new RenderTarget2D(tex.GraphicsDevice, tex.Width, tex.Height);
+
+            tex.GraphicsDevice.SetRenderTarget(target);
+            tex.GraphicsDevice.Clear(Color.Transparent);
+
+            var spriteBatch = new SpriteBatch(tex.GraphicsDevice);
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            spriteBatch.Draw(tex, tex.Bounds, Color.White);
+            spriteBatch.End();
+            
+            tex.GraphicsDevice.SetRenderTarget(null);
+
+            var result = new Color[target.Width * target.Height];
+            target.GetData(result);
             return result;
         }
 
